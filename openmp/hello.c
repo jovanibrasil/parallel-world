@@ -1,20 +1,14 @@
-#include <omp.h>
-#include <stdio.h>
-#include <stdlib.h>
- 
-int main (int argc, char *argv[]) {
-    int th_id, nthreads;
+#include<stdio.h> 
+#include"omp.h"
 
-    // omp_set_num_threads(4); // disparar 4 threads pois se trata de uma m�quina Quad-Core
-    #pragma omp parallel private(th_id, nthreads) num_threads(4)
+void main(){
+    // Clause to request a certain number os threads
+    omp_set_num_threads(6);
+    #pragma omp parallel
     {
-        th_id = omp_get_thread_num();
-        nthreads = omp_get_num_threads();
-
-        printf("Hello World from thread %d of %d threads.\n", th_id, nthreads);
+        int ID = omp_get_thread_num();
+        printf("Hello(%d)", ID);
+        printf("world(%d)\n", ID);
+        
     }
-
-    getchar();
-    return EXIT_SUCCESS;
- }
-
+}
