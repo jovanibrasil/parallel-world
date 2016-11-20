@@ -22,8 +22,17 @@ void print_vector_matrix(int *m);
 int main(int argc, char** argv){
 
         // TODO Parametrizar.
+        
+        if(argc == 3){
+            // Quantidade de tarefas
+            // Tamanho de cada tarefa
+            printf("%s \n", argv[1]);
+            printf("%s \n", argv[2]);
+        }else{
+            return (-1);
+        }
 
-	int my_rank;  /* Identificador do processo */
+        int my_rank;  /* Identificador do processo */
 	int proc_n;   /* Número de processos */
 	int source;   /* Identificador do proc.origem */
 	int dest;     /* Identificador do proc. destino */
@@ -164,6 +173,7 @@ int main(int argc, char** argv){
 	}
 
 	MPI_Finalize();
+        return (0);
 }
 
 void print_vector_matrix(int *m){
