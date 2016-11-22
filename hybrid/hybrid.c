@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 
+// TODO Deve ser 8 ou 16. Deve ser passado por parâmetro.
 #define NUM_THREADS 7
 
 int cmpfunc (const void * a, const void * b);
@@ -27,6 +28,7 @@ int main(int argc, char** argv){
         MPI_Status status;  // Status de retorno.
         //char proc_name[MPI_MAX_PROCESSOR_NAME];
 
+        // Organiza parametrizacao.
         if(argc == 3){
             tasks_num = atoi(argv[1]);
             task_size = atoi(argv[2]);
@@ -75,13 +77,13 @@ int main(int argc, char** argv){
                 // Mostra matriz inicializada.
                 print_vector_matrix(bag, task_size, task_size *tasks_num);
 
-                int r_m = 0, s_m = 0;
+                int r_m = 0, s_m = 0;                           // Contadores de mensagens enviadas e recebidas.
                
                 // Envia primeira rajada;
                 // TODO O que fazer quando não há trabalho suficiente
                 // para distribuir a todos os nodos.
              
-                int task_block = task_size * NUM_THREADS;
+                int task_block = task_size * NUM_THREADS;       // Tamanho do bloco a ser enviado para os escravos.
                 
                 int proc_rank = 1;
                 while(proc_rank < proc_n){
