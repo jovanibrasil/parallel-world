@@ -78,9 +78,9 @@ int main(int argc, char** argv){
                 int r_m = 0, s_m = 0;
                
                 // Envia primeira rajada;
-                // TODO Quando eu nao tenho trabalho suficiente
-                // para distribuir trabalho para todos os cores.
-                
+                // TODO O que fazer quando não há trabalho suficiente
+                // para distribuir a todos os nodos.
+             
                 int task_block = task_size * NUM_THREADS;
                 
                 int proc_rank = 1;
@@ -89,7 +89,7 @@ int main(int argc, char** argv){
                         //printf("MPI task sended to process %d. \n", proc_rank);        
                         printf("Unidades de tarefas %d-%d enviadas para %d. \n", next_task, next_task+task_block-1, proc_rank);
                         s_m++;
-                        // The task bag[next_task] is associated with the processes proc_rank
+                        // The task bag[next_task] is associated with the processes proc_rank.
                         index[proc_rank] = next_task;
                         next_task += task_block;
                         proc_rank++;
@@ -99,12 +99,15 @@ int main(int argc, char** argv){
 
                 // Iniciativa no escravo. Mestre faz gerencia dos pedidos dos processos enquanto existe tarefas.
                 while(1){
-                        // Recebe e guarda o trabalho realizado
+                        // TODO considerar que a quantidade de tarefas muda no final. Processar o resto paralelamente e 
+                        // localmente se necessário.
+                        // TODO considerar a opção de realizar o trabalho localmente.
+                        // Recebe e guarda o trabalho realizado.
                         MPI_Recv (message, task_size * NUM_THREADS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                         memcpy(&bag[index[status.MPI_SOURCE]], message, task_size * NUM_THREADS * sizeof(int));
                         //count_messages--;                     
                         r_m++;
-                        // Testo se eu nao tenho mais tarefas
+                        // Testo se eu nao tenho mais tarefas.
                         printf("Sended messages: %d Received messages: %d \n", s_m, r_m);
                         printf("Next task = %d \n", next_task);
                         if(next_task < size){
@@ -139,12 +142,13 @@ int main(int argc, char** argv){
 
         // Caso contrario sou um elemento intermediario
         }else{
-                // Recebeu primeiro trabalho, agora só fica esperando mensagem de suicidio
+                // Recebeu primeiro trabalho, agora só fica esperando mensagem de suicidio.
                 while(1){
                         // Recebe mensagem.
                         MPI_Recv(message, task_size * NUM_THREADS, MPI_INT , 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
-                        // Se for uma mensagem de suicidio (MPI_TAG == 1).
+                        // Se for uma mensagem de suicidio (MPI_TAG == -1), caso contrario é a quantidade de tarefas.
+                        // TODO considerar quantidade de tarefas. 
                         if(!status.MPI_TAG)
                                 break;
 
