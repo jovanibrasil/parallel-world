@@ -117,7 +117,6 @@ int main(int argc, char** argv){
                                 s_m +=1;
                         }else{
                             // Sobraram tarefas, faz a ordenação local.
-                            // TODO calculo errado
                             printf("Sobraram %d unidades de tarefa. \n", (size - task_block) / task_size);
                             break;
                         }
