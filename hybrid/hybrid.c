@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "mpich/mpi.h"
+//#include "mpich/mpi.h"
+#include "mpi.h" 
 #include "omp.h"
 #include <stdlib.h>
 #include <time.h>
@@ -7,19 +8,18 @@
 #include <unistd.h>
 #include <string.h>
 
-// TODO Deve ser 8 ou 16. Deve ser passado por parâmetro.
-#define NUM_THREADS 7
-
 int cmpfunc (const void * a, const void * b);
 void print_vector_matrix(int *m, int l_size, int v_size);
 
 int main(int argc, char** argv){
-
+	
         int my_rank;        // Identificador do processo.
         int proc_n;         // Número de processo.
-        int tasks_num;      // Number of tasks that we have.
+        // TODO Rever os nomes destas variaveis.
+	int tasks_num;      // Number of tasks that we have.
         int task_size;      // Size of each task.
-        int source;         // Identificador do proc.origem.
+        int num_threads;    // Number of threads.
+	int source;         // Identificador do proc.origem.
         int dest;           // Identificador do proc. destino.
         int tag = 50;       // Tag para as mensagens.
         int *message;
@@ -29,9 +29,11 @@ int main(int argc, char** argv){
         //char proc_name[MPI_MAX_PROCESSOR_NAME];
 
         // Organiza parametrizacao.
-        if(argc == 3){
+        if(argc == 4){
+	    // (numero_de_tarefas, tamanho_da_tarefa, quantidade_de_threads)
             tasks_num = atoi(argv[1]);
             task_size = atoi(argv[2]);
+	    num_threads = atoi(argv[3]);	    
         }else{
             return (-1);
         }
@@ -47,7 +49,7 @@ int main(int argc, char** argv){
 
         //printf("There are %d procs!!\n", proc_n);
 
-        message = (int*)malloc(sizeof(int) * task_size * NUM_THREADS);
+        message = (int*)malloc(sizeof(int) * task_size * num_threads);
 
         // Se eu sou o mestre
         if(my_rank == 0){
@@ -83,11 +85,11 @@ int main(int argc, char** argv){
                 // TODO O que fazer quando não há trabalho suficiente
                 // para distribuir a todos os nodos.
              
-                int task_block = task_size * NUM_THREADS;       // Tamanho do bloco a ser enviado para os escravos.
+                int task_block = task_size * num_threads;       // Tamanho do bloco a ser enviado para os escravos.
                 
                 int proc_rank = 1;
                 while(proc_rank < proc_n){
-                        MPI_Send (&bag[next_task], task_block, MPI_INT, proc_rank, tag, MPI_COMM_WORLD);
+                        MPI_Send (&bag[next_task], task_block, MPI_INT, proc_rank, 7, MPI_COMM_WORLD);
                         //printf("MPI task sended to process %d. \n", proc_rank);        
                         printf("Unidades de tarefas %d-%d enviadas para %d. \n", next_task, next_task+task_block-1, proc_rank);
                         s_m++;
@@ -97,16 +99,14 @@ int main(int argc, char** argv){
                         proc_rank++;
                 }
 
-                // TODO distribuir localmente
-
                 // Iniciativa no escravo. Mestre faz gerencia dos pedidos dos processos enquanto existe tarefas.
                 while(1){
                         // TODO considerar que a quantidade de tarefas muda no final. Processar o resto paralelamente e 
                         // localmente se necessário.
                         // TODO considerar a opção de realizar o trabalho localmente.
                         // Recebe e guarda o trabalho realizado.
-                        MPI_Recv (message, task_size * NUM_THREADS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-                        memcpy(&bag[index[status.MPI_SOURCE]], message, task_size * NUM_THREADS * sizeof(int));
+                        MPI_Recv (message, task_size * num_threads, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                        memcpy(&bag[index[status.MPI_SOURCE]], message, task_size * num_threads * sizeof(int));
                         //count_messages--;                     
                         r_m++;
                         // Testo se eu nao tenho mais tarefas.
@@ -114,7 +114,7 @@ int main(int argc, char** argv){
                         printf("Next task = %d \n", next_task);
                         if(next_task < size){
                                 // Envia um novo trabalho para o processo                       
-                                MPI_Send (&bag[next_task], task_block, MPI_INT, status.MPI_SOURCE, tag, MPI_COMM_WORLD);
+                                MPI_Send (&bag[next_task], task_block, MPI_INT, status.MPI_SOURCE, 7, MPI_COMM_WORLD);
                                 // printf("MPI task sended to process %d. \n", status.MPI_SOURCE);
                                 printf("Unidades de tarefas %d-%d enviadas para %d. \n", next_task, next_task+task_block-1, proc_rank);
                                 index[status.MPI_SOURCE] = next_task;
@@ -128,10 +128,12 @@ int main(int argc, char** argv){
 
                 }
 
+		printf("mandando mensagens de suicidio\n");
+
                 // Envia mensagem de suicio para todos os escravos.
                 int p = 0;
                 for(i=1; i<proc_n; i++){
-                        printf("MPI send to process %d. \n", i);
+                        // printf("MPI send to process %d. \n", i);
                         MPI_Send (&p, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
                         s_m++;
                 }
@@ -144,28 +146,34 @@ int main(int argc, char** argv){
 
         // Caso contrario sou um elemento intermediario
         }else{
-                // Recebeu primeiro trabalho, agora só fica esperando mensagem de suicidio.
+                int task_n;
+		// Recebeu primeiro trabalho, agora só fica esperando mensagem de suicidio.
                 while(1){
+			task_n = num_threads;
+
                         // Recebe mensagem.
-                        MPI_Recv(message, task_size * NUM_THREADS, MPI_INT , 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                        MPI_Recv(message, task_size * num_threads, MPI_INT , 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
                         // Se for uma mensagem de suicidio (MPI_TAG == -1), caso contrario é a quantidade de tarefas.
                         // TODO considerar quantidade de tarefas. 
+			
                         if(!status.MPI_TAG)
                                 break;
+			else
+				task_n = status.MPI_TAG;			
 
                         // Configura a quantidade de threads.
-                        omp_set_num_threads(NUM_THREADS);
+                        omp_set_num_threads(task_n);
                         // Divide o processamento em diferentes threads.
                         #pragma omp parallel for schedule(static)
-                        for(i=0; i<NUM_THREADS; i++){
+                        for(i=0; i<task_n; i++){
                             qsort(&message[i*task_size], task_size, sizeof(int), cmpfunc);
                             // int id = omp_get_thread_num();
                             // int nt = omp_get_num_threads();
                         }
 
                         // Envia resultado e pede mais trabalho.
-                        MPI_Send (message, task_size * NUM_THREADS, MPI_INT, 0, tag, MPI_COMM_WORLD);
+                        MPI_Send (message, task_size * num_threads, MPI_INT, 0, tag, MPI_COMM_WORLD);
                 }
         }
 

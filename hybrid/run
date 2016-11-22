@@ -1,4 +1,4 @@
 #!/bin/bash
 
 make
-mpirun -np 3 ./hybrid 40 10
+mpirun -np 3 ./hybrid 40 10 8
