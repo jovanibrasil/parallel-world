@@ -1,4 +1,17 @@
 #!/bin/bash
 
 make
-mpirun -np 3 ./hybrid 40 10 8
+mpirun -np 5 ./hybrid 100 20 16 bsort
+mpirun -np 5 ./hybrid 100 20 8 qsort
+mpirun -np 5 ./hybrid 1000 200 8 qsort
+mpirun -np 5 ./hybrid 1000 200 8 qsort
+mpirun -np 5 ./hybrid 1000 2000 8 qsort
+
+# Cenário           - 4 nodos
+#                   - 4 x 8 e 4 * 16 threads
+#                   - 10k x 100k 
+mpirun -np 5 ./hybrid 10000 100000 32 qsort
+mpirun -np 5 ./hybrid 10000 100000 32 bsort
+mpirun -np 5 ./hybrid 10000 100000 64 qsort
+mpirun -np 5 ./hybrid 10000 100000 64 bsort
+
