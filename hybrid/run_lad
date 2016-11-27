@@ -2,12 +2,14 @@
 
 make clean
 
-#ladcomp -env mpicc sort_mpi.c -o sort_mpi
+ladcomp -env mpicc sort_mpi.c -o sort_mpi
 
-#ladrun -np 5 sort_mpi 10000 100000 8 qsort
-#ladrun -np 5 sort_mpi 10000 100000 8 bsort
-#ladrun -np 5 sort_mpi 10000 100000 16 qsort
-#ladrun -np 5 sort_mpi 10000 100000 16 bsort
+#ladrun -np 16 sort_mpi 10000 100000 1 qsort
+#ladrun -np 32 sort_mpi 10000 100000 1 qsort
+#ladrun -np 64 sort_mpi 10000 100000 1 qsort
+ladrun -np 16 sort_mpi 10000 100000 1 bsort
+ladrun -np 32 sort_mpi 10000 100000 1 bsort
+ladrun -np 64 sort_mpi 10000 100000 1 bsort
 
 ladcomp -env mpiompcc sort_hybrid.c -o sort_hybrid 
 
@@ -18,17 +20,29 @@ ladcomp -env mpiompcc sort_hybrid.c -o sort_hybrid
 
 # Quicksort
 
+#echo "A"
+
 #ladrun -np 5 sort_hybrid 1000 25000 4 qsort
 #ladrun -np 5 sort_hybrid 1000 25000 8 qsort
 #ladrun -np 5 sort_hybrid 1000 25000 16 qsort
+
+#echo "B"
 
 #ladrun -np 5 sort_hybrid 5000 50000 4 qsort
 #ladrun -np 5 sort_hybrid 5000 50000 8 qsort
 #ladrun -np 5 sort_hybrid 5000 50000 16 qsort
 
-ladrun -np 5 sort_hybrid 20000 100000 4 qsort
-ladrun -np 5 sort_hybrid 20000 100000 8 qsort
-ladrun -np 5 sort_hybrid 20000 100000 16 qsort
+#echo "C"
+
+#ladrun -np 5 sort_hybrid 10000 100000 4 qsort
+#ladrun -np 5 sort_hybrid 10000 100000 8 qsort
+#ladrun -np 5 sort_hybrid 10000 100000 16 qsort
+
+#echo "D"
+
+#ladrun -np 5 sort_hybrid 20000 100000 4 qsort
+#ladrun -np 5 sort_hybrid 20000 100000 8 qsort
+#ladrun -np 5 sort_hybrid 20000 100000 16 qsort
 
 # Bubblesort
 
