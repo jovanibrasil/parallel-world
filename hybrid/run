@@ -1,6 +1,6 @@
 #!/bin/bash
 
-make
+make 
 mpirun -np 5 ./hybrid 100 20 16 bsort
 mpirun -np 5 ./hybrid 100 20 8 qsort
 mpirun -np 5 ./hybrid 1000 200 8 qsort

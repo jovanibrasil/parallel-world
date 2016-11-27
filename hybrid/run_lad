@@ -1,0 +1,40 @@
+#!/bin/bash
+
+make clean
+
+#ladcomp -env mpicc sort_mpi.c -o sort_mpi
+
+#ladrun -np 5 sort_mpi 10000 100000 8 qsort
+#ladrun -np 5 sort_mpi 10000 100000 8 bsort
+#ladrun -np 5 sort_mpi 10000 100000 16 qsort
+#ladrun -np 5 sort_mpi 10000 100000 16 bsort
+
+ladcomp -env mpiompcc sort_hybrid.c -o sort_hybrid 
+
+# ladrun -np 5 hybrid 100 20 16 bsort
+# ladrun -np 5 hybrid 100 20 8 bsort
+# ladrun -np 5 hybrid 1000 200 8 bsort
+# ladrun -np 5 hybrid 1000 2000 8 qsort
+
+# Quicksort
+
+#ladrun -np 5 sort_hybrid 1000 25000 4 qsort
+#ladrun -np 5 sort_hybrid 1000 25000 8 qsort
+#ladrun -np 5 sort_hybrid 1000 25000 16 qsort
+
+#ladrun -np 5 sort_hybrid 5000 50000 4 qsort
+#ladrun -np 5 sort_hybrid 5000 50000 8 qsort
+#ladrun -np 5 sort_hybrid 5000 50000 16 qsort
+
+ladrun -np 5 sort_hybrid 20000 100000 4 qsort
+ladrun -np 5 sort_hybrid 20000 100000 8 qsort
+ladrun -np 5 sort_hybrid 20000 100000 16 qsort
+
+# Bubblesort
+
+#ladrun -np 5 sort_hybrid 1000 25000 4 bsort
+#ladrun -np 5 sort_hybrid 1000 25000 8 bsort
+#ladrun -np 5 sort_hybrid 1000 25000 16 bsort
+
+
+
